@@ -9,6 +9,22 @@ navbar:
   logo:
     image: assets/logo.png
   right:
+    - text: "Method"
+      href: method.html
+    - text: "Pipeline"
+      menu:
+        - text: "Prepare VAERS data for safety signal detection"
+          href: analysis-prepare-data.html
+        - text: "Base Ranker: Gamma Poisson Shrinker"
+          href: analysis-gps.html
+        - text: "Base Ranker: Proportional Reporting Ratio"
+          href: analysis-prr.html
+        - text: "Base Ranker: Reporting Odds Ratio"
+          href: analysis-ror.html
+        - text: "Base Ranker: Bayesian Confidence Propagation Neural Network"
+          href: analysis-bcpnn.html
+        - text: "Rank aggregation for ensembled safety signal detection"
+          href: analysis-rankagg.html
     - icon: fab fa-github
       href: https://github.com/nanxstats/rankv
 output:

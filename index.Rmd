@@ -31,8 +31,12 @@ Here is the [method summary](method.html).
 # Pipeline
 
 1. [Prepare VAERS data for safety signal detection](analysis-prepare-data.html)
-2. [Base ranker: Gamma Poisson Shrinker (GPS)](analysis-gps.html)
-3. [Base ranker: Proportional Reporting Ratio (PRR)](analysis-prr.html)
-4. [Base ranker: Reporting Odds Ratio (ROR)](analysis-ror.html)
-5. [Base ranker: Bayesian Confidence Propagation Neural Network (BCPNN)](analysis-bcpnn.html)
-6. [Rank aggregation for ensembled safety signal detection](analysis-rankagg.html)
+
+2. Base signal detectors and rankers
+
+    - [Base ranker: Gamma Poisson Shrinker (GPS)](analysis-gps.html)
+    - [Base ranker: Proportional Reporting Ratio (PRR)](analysis-prr.html)
+    - [Base ranker: Reporting Odds Ratio (ROR)](analysis-ror.html)
+    - [Base ranker: Bayesian Confidence Propagation Neural Network (BCPNN)](analysis-bcpnn.html)
+
+3. [Rank aggregation for ensembled safety signal detection](analysis-rankagg.html)
