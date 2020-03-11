@@ -4,6 +4,8 @@ description: |
   This site presents our method, analysis pipeline, and findings for the
   precisionFDA adverse event anomaly detecting challenge.
 favicon: "assets/favicon.png"
+base_url: https://nanx.me/rankv
+repository_url: https://github.com/nanxstats/rankv
 output_dir: "docs"
 navbar:
   logo:
