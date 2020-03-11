@@ -1,0 +1,108 @@
+---
+title: "Rank aggregation for ensembled safety signal detection"
+author:
+  - name: Nan Xiao
+    url: https://nanx.me/
+    affiliation: Seven Bridges
+    affiliation_url: https://www.sevenbridges.com/
+  - name: Soner Koc
+    url: https://github.com/skoc
+    affiliation: Seven Bridges
+    affiliation_url: https://www.sevenbridges.com/
+  - name: Kaushik Ghose
+    url: https://kaushikghose.wordpress.com/
+    affiliation: Seven Bridges
+    affiliation_url: https://www.sevenbridges.com/
+date: "`r Sys.Date()`"
+output: distill::distill_article
+bibliography: rankv.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, cache = TRUE)
+```
+
+Load the detected signals from base signal rankers:
+
+```{r}
+df_gps <- readRDS("data-processed/df_gps.rds")
+df_prr <- readRDS("data-processed/df_prr.rds")
+df_ror <- readRDS("data-processed/df_ror.rds")
+df_bcpnn <- readRDS("data-processed/df_bcpnn.rds")
+
+rownames(df_gps) <- paste(df_gps$var1, df_gps$var2, sep = " <> ")
+rownames(df_prr) <- paste(df_prr$`drug code`, df_prr$`event effect`, sep = " <> ")
+rownames(df_ror) <- paste(df_ror$`drug code`, df_ror$`event effect`, sep = " <> ")
+rownames(df_bcpnn) <- paste(df_bcpnn$`drug code`, df_bcpnn$`event effect`, sep = " <> ")
+```
+
+Only keep the commonly detected signals:
+
+```{r}
+common_signals <- Reduce(intersect, list(rownames(df_gps), rownames(df_prr), rownames(df_ror), rownames(df_bcpnn)))
+length(common_signals)
+```
+
+Re-rank the detected signals in each method:
+
+```{r}
+df_gps <- df_gps[common_signals, ]
+df_prr <- df_prr[common_signals, ]
+df_ror <- df_ror[common_signals, ]
+df_bcpnn <- df_bcpnn[common_signals, ]
+
+df_gps <- df_gps[order(df_gps$QUANT_05, decreasing = TRUE), ]
+df_prr <- df_prr[order(df_prr$`LB95(log(PRR))`, decreasing = TRUE), ]
+df_ror <- df_ror[order(df_ror$`LB95(log(ROR))`, decreasing = TRUE), ]
+df_bcpnn <- df_bcpnn[order(df_bcpnn$`Q_0.025(log(IC))`, decreasing = TRUE), ]
+```
+
+Transform the ranked lists into the matrix form:
+
+```{r}
+ranks <- matrix(NA, nrow = 4, ncol = length(common_signals))
+ranks[1, ] <- rownames(df_gps)
+ranks[2, ] <- rownames(df_prr)
+ranks[3, ] <- rownames(df_ror)
+ranks[4, ] <- rownames(df_bcpnn)
+
+colnames(ranks) <- 1:ncol(ranks)
+```
+
+Perform rank aggregation [@pihur2007] to create an ensembled safety signal list using the Spearman footrule distance and genetic algorithm. To keep the problem size tractable, we only optimize and generate a the top-25 optimal list:
+
+```{r}
+library("RankAggreg")
+
+rankagg <- RankAggreg(
+  ranks, k = 25,
+  distance = "Spearman", method = "GA", maxIter = 10000,
+  seed = 2020, verbose = FALSE
+)
+```
+
+Check the rank-aggregated list:
+
+```{r}
+plot(rankagg)
+rankagg$top.list
+```
+
+Write the results to txt file for submission:
+
+```{r}
+df_gps_agg <- df_gps[rankagg$top.list, ]
+
+txt <- paste0(
+  1:nrow(df_gps_agg),
+  ". After aggregating multiple ranks of the detected signals, the reporting of the adverse reaction \"",
+  df_gps_agg$var2,
+  "\" for vaccine \"",
+  df_gps_agg$var1,
+  "\" is disproportionately high compared to this same event for all other vaccines, with ",
+  df_gps_agg$N,
+  " total reports."
+)
+
+write(paste(txt, collapse = "\n"), file = "submission/rankv-anomalies.txt")
+```

@@ -1,0 +1,17 @@
+name: "rankv"
+title: "Rank Aggregated Signal Detection for VAERS Data"
+description: |
+  This site presents the solution code and results for the PrecisionFDA
+  Gaining New Insights by Detecting Adverse Event Anomalies Using FDA Open Data
+  challenge.
+output_dir: "docs"
+navbar:
+  logo:
+    image: assets/logo.png
+  right:
+    - icon: fab fa-github
+      href: https://github.com/nanxstats/rankv
+output:
+  distill::distill_article:
+    css: "assets/styles.css"
+exclude: ["code", "data", "data-processed", "submission"]

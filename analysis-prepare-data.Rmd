@@ -1,0 +1,202 @@
+---
+title: "Prepare VAERS data for safety signal detection"
+author:
+  - name: Nan Xiao
+    url: https://nanx.me/
+    affiliation: Seven Bridges
+    affiliation_url: https://www.sevenbridges.com/
+  - name: Soner Koc
+    url: https://github.com/skoc
+    affiliation: Seven Bridges
+    affiliation_url: https://www.sevenbridges.com/
+  - name: Kaushik Ghose
+    url: https://kaushikghose.wordpress.com/
+    affiliation: Seven Bridges
+    affiliation_url: https://www.sevenbridges.com/
+date: "`r Sys.Date()`"
+output:
+  distill::distill_article:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+This page describes the steps involved to downloaded and preprocess the raw VAERS data, and transform the data into an analyzable format.
+
+# Download the data
+
+To download the VAERS data:
+
+- Go to the [VAERS Data Sets page](https://vaers.hhs.gov/data/datasets.html).
+- Download the zip files from 1990 to 2019 (need to pass the captchas).
+- Put all downloaded zip files in the `data/` folder as is.
+
+As time of the download (Feburary 2020), all years of data since 1990
+was complete except for 2019. The data for 2019 contains VAERS
+reports processed as of 2019-12-14.
+
+We think the captchas in each dataset download page makes it unnecessarily
+complicated to automate the data retrieval process, especially when 30 years
+of data. Providing an standard, programatically accessible API for retriving
+the data like the current AERS database would be helpful.
+
+# Load the data
+
+```{r}
+library("readr")
+library("dplyr")
+library("tidyr")
+
+year <- as.character(1990:2019)
+k <- length(year)
+file_zip <- paste0("data/", year, "VAERSData.zip")
+file_meta <- paste0(year, "VAERSDATA.csv")
+file_vax <- paste0(year, "VAERSVAX.csv")
+file_sym <- paste0(year, "VAERSSYMPTOMS.csv")
+
+lst_meta <- vector("list", k)
+lst_vax <- vector("list", k)
+lst_sym <- vector("list", k)
+
+for (i in 1:k) {
+  cat("Reading VAERS data from year", year[i], "\n")
+  con1 <- unz(description = file_zip[i], filename = file_meta[i])
+  lst_meta[[i]] <- read_csv(con1, col_types = cols(VAERS_ID = col_character()))
+
+  con2 <- unz(description = file_zip[i], filename = file_vax[i])
+  lst_vax[[i]] <- read_csv(con2, col_types = cols(VAERS_ID = col_character()))
+
+  con3 <- unz(description = file_zip[i], filename = file_sym[i])
+  lst_sym[[i]] <- read_csv(con3, col_types = cols(VAERS_ID = col_character()))
+}
+
+df_meta <- dplyr::bind_rows(lst_meta)
+df_vax <- dplyr::bind_rows(lst_vax)
+df_sym <- dplyr::bind_rows(lst_sym)
+
+df_meta <- df_meta[, c("VAERS_ID", "AGE_YRS", "SEX")]
+df_vax <- df_vax[, c("VAERS_ID", "VAX_NAME")]
+df_sym <- df_sym[, c("VAERS_ID", "SYMPTOM1", "SYMPTOM2", "SYMPTOM3", "SYMPTOM4", "SYMPTOM5")]
+```
+
+# Quality Control
+
+To ensure the basic data quality, remove all rows with `NA`s from the metadata table:
+
+```{r}
+df_meta <- df_meta[complete.cases(df_meta), ]
+```
+
+Concatenate columns for symptoms:
+
+```{r}
+df_sym$"SYMPTOM" <- paste(df_sym$SYMPTOM1, df_sym$SYMPTOM2, df_sym$SYMPTOM3, df_sym$SYMPTOM4, df_sym$SYMPTOM5, sep = ", ")
+```
+
+Use the VAERS IDs that are common across all tables as the index:
+
+```{r}
+id <- intersect(intersect(unique(df_meta$VAERS_ID), unique(df_vax$VAERS_ID)), unique(df_sym$VAERS_ID))
+```
+
+Keep only the VAERS IDs shared across all tables:
+
+```{r}
+df_meta <- df_meta[df_meta$VAERS_ID %in% id, ]
+df_vax <- df_vax[df_vax$VAERS_ID %in% id, ]
+df_sym <- df_sym[df_sym$VAERS_ID %in% id, ]
+```
+
+Squash the same IDs but multiple symptoms or multiple vaccines into one row:
+
+```{r}
+df_vax <- df_vax %>%
+  group_by(VAERS_ID) %>%
+  arrange(VAX_NAME) %>%
+  summarise(VAX_NAMES = paste(VAX_NAME, collapse = ", "))
+
+df_sym <- df_sym %>%
+  group_by(VAERS_ID) %>%
+  arrange(SYMPTOM) %>%
+  summarise(SYMPTOMS = paste(SYMPTOM, collapse = ", "))
+```
+
+# Merge tables
+
+Merge all tables
+
+```{r}
+df <- inner_join(inner_join(df_meta, df_vax, by = "VAERS_ID"), df_sym, by = "VAERS_ID")
+```
+
+Separate the rows with multiple vaccines or multiple symptoms into multiple rows:
+
+```{r}
+df <- separate_rows(df, VAX_NAMES, sep = ", ")
+df <- separate_rows(df, SYMPTOMS, sep = ", ")
+df <- df[(df$SYMPTOMS != "NA"), ]
+```
+
+# Recode variables
+
+Recode stratification variables and recode age groups:
+
+```{r}
+names(df) <- c("id", "strat_age", "strat_gender", "var1", "var2")
+df$strat_gender <- recode(df$strat_gender, F = "Female", M = "Male", U = "Unknown")
+
+idx1 <- which(df$strat_age <= 2)
+idx2 <- which(df$strat_age > 2 & df$strat_age <= 18)
+idx3 <- which(df$strat_age > 18 & df$strat_age <= 65)
+idx4 <- which(df$strat_age > 65)
+
+df$strat_age[idx1] <- "<= 2"
+df$strat_age[idx2] <- "2 - 18"
+df$strat_age[idx3] <- "18 - 65"
+df$strat_age[idx4] <- "> 65"
+
+df$strat_gender <- as.factor(df$strat_gender)
+df$strat_age <- as.factor(df$strat_age)
+```
+
+# Save to file
+
+Rearrange variable order:
+
+```{r}
+df <- df[, c("id", "var1", "var2", "strat_age", "strat_gender")]
+```
+
+Sanity check:
+
+```{r}
+dim(df)
+```
+
+```
+# [1] 3441506       5
+```
+
+```{r}
+head(df)
+```
+
+```
+# # A tibble: 6 x 5
+#   id     var1                var2        strat_age strat_gender
+#   <chr>  <chr>               <chr>       <fct>     <fct>       
+# 1 025001 DTP (NO BRAND NAME) Agitation   <= 2      Female      
+# 2 025003 DTP (TRI-IMMUNOL)   Delirium    <= 2      Male        
+# 3 025003 DTP (TRI-IMMUNOL)   Hypokinesia <= 2      Male        
+# 4 025003 DTP (TRI-IMMUNOL)   Hypotonia   <= 2      Male        
+# 5 025003 POLIO VIRUS         Delirium    <= 2      Male        
+# 6 025003 POLIO VIRUS         Hypokinesia <= 2      Male      
+```
+
+Save to file:
+
+```{r}
+saveRDS(df, file = "data-processed/df.rds")
+```

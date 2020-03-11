@@ -1,0 +1,282 @@
+---
+title: "Base Ranker: Gamma Poisson Shrinker (GPS)"
+author:
+  - name: Nan Xiao
+    url: https://nanx.me/
+    affiliation: Seven Bridges
+    affiliation_url: https://www.sevenbridges.com/
+  - name: Soner Koc
+    url: https://github.com/skoc
+    affiliation: Seven Bridges
+    affiliation_url: https://www.sevenbridges.com/
+  - name: Kaushik Ghose
+    url: https://kaushikghose.wordpress.com/
+    affiliation: Seven Bridges
+    affiliation_url: https://www.sevenbridges.com/
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, cache = TRUE)
+```
+
+# Calculate PRR
+
+Calculate actual counts (N), expected counts (E) of each vaccine-symptom combination,
+relative reporting ratio (RR), and proportional reporting ratio (PRR)
+using age + gender stratification to control potential confounding effects [@canida2017openebgm]:
+
+```{r}
+library("openEBGM")
+library("magrittr")
+library("kableExtra")
+
+df_p <- readRDS("data-processed/df.rds") %>%
+  processRaw(stratify = TRUE, zeroes = FALSE)
+```
+
+```
+# stratification variables used: strat_age, strat_gender 
+# there were 12 strata:  <= 2-Female, <= 2-Male, <= 2-Unknown, > 65-Female, > 65-Male, > 65-Unknown, 18 - 65-Female, 18 - 65-Male, 18 - 65-Unknown, 2 - 18-Female, 2 - 18-Male, 2 - 18-Unknown 
+```
+
+Sanity check:
+
+```{r}
+df_p %>% head()
+```
+
+```
+#                         var1             var2 N           E     RR    PRR
+# 1 ADENOVIRUS (NO BRAND NAME)       Arthralgia 1 0.119480157   8.37  16.26
+# 2 ADENOVIRUS (NO BRAND NAME)         Dyspnoea 1 0.083668035  11.95  17.43
+# 3 ADENOVIRUS (NO BRAND NAME)      Face oedema 1 0.011163701  89.58  86.42
+# 4 ADENOVIRUS (NO BRAND NAME) Gait disturbance 1 0.014375342  69.56  67.12
+# 5 ADENOVIRUS (NO BRAND NAME)   Osteoarthritis 1 0.005387014 185.63 296.72
+# 6 ADENOVIRUS (NO BRAND NAME)        Petechiae 1 0.002717102 368.04 212.56
+```
+
+Save processed data to file:
+
+```{r}
+df_p %>% saveRDS(file = "data-processed/df_p.rds")
+```
+
+# Fit Prior
+
+```{r}
+df_p <- readRDS("data-processed/df_p.rds")
+squashed <- squashData(df_p, bin_size = 100, keep_pts = 0)
+squashed <- squashData(squashed, count = 2, bin_size = 12)
+```
+
+```{r}
+library("foreach")
+library("doParallel")
+registerDoParallel(parallel::detectCores())
+
+suppressMessages(library("DEoptim"))
+
+set.seed(2020)
+theta_hat <- DEoptim(
+  negLLsquash,
+  lower = c(rep(1e-05, 4), 0.001),
+  upper = c(rep(5, 4), 1 - 0.001),
+  control = DEoptim.control(
+    itermax = 500,
+    reltol = 1e-04,
+    steptol = 200,
+    NP = 100,
+    CR = 0.85,
+    F = 0.75,
+    trace = 25,
+    parallelType = 2
+  ),
+  ni = squashed$N, ei = squashed$E, wi = squashed$weight
+)
+```
+
+```
+# Iteration: 25 bestvalit: 325555.202871 bestmemit:    0.014104    0.116785    1.749330    1.712070    0.101938
+# Iteration: 50 bestvalit: 325354.375330 bestmemit:    0.002284    0.113023    2.013934    1.947101    0.094070
+# Iteration: 75 bestvalit: 325347.784248 bestmemit:    0.000153    0.115025    2.093288    2.020985    0.097340
+# Iteration: 100 bestvalit: 325347.575191 bestmemit:    0.000036    0.116657    2.103292    2.031426    0.099336
+# Iteration: 125 bestvalit: 325347.567304 bestmemit:    0.000010    0.116819    2.103899    2.031816    0.099493
+# Iteration: 150 bestvalit: 325347.567208 bestmemit:    0.000010    0.116802    2.103769    2.031757    0.099480
+# Iteration: 175 bestvalit: 325347.567205 bestmemit:    0.000010    0.116798    2.103761    2.031760    0.099474
+# Iteration: 200 bestvalit: 325347.567205 bestmemit:    0.000010    0.116799    2.103766    2.031765    0.099474
+# Iteration: 225 bestvalit: 325347.567205 bestmemit:    0.000010    0.116799    2.103766    2.031764    0.099475
+```
+
+Check $\hat{\theta}$:
+
+```{r}
+theta_hat <- as.numeric(theta_hat$optim$bestmem)
+theta_hat
+```
+
+```
+# 1.000001e-05 1.167989e-01 2.103766e+00 2.031764e+00 9.947457e-02
+```
+
+Save to file:
+
+```{r}
+saveRDS(theta_hat, file = "data-processed/theta_hat.rds")
+```
+
+# Infer Empirical Bayes scores
+
+```{r}
+df_p <- readRDS("data-processed/df_p.rds")
+squashed <- squashData(df_p, bin_size = 100, keep_pts = 0)
+squashed <- squashData(squashed, count = 2, bin_size = 12)
+
+theta_hat <- readRDS("data-processed/theta_hat.rds")
+```
+
+```{r}
+qn <- Qn(theta_hat, N = df_p$N, E = df_p$E)
+head(qn)
+identical(length(qn), nrow(df_p))
+summary(qn)
+```
+
+```{r}
+df_p$ebgm <- ebgm(theta_hat, N = df_p$N, E = df_p$E, qn = qn)
+head(df_p) %>% kable() %>% kable_styling()
+```
+
+```{r}
+df_p$QUANT_05 <- quantBisect(
+  5,
+  theta_hat = theta_hat,
+  N = df_p$N, E = df_p$E, qn = qn
+)
+df_p$QUANT_95 <- quantBisect(
+  95,
+  theta_hat = theta_hat,
+  N = df_p$N, E = df_p$E, qn = qn
+)
+head(df_p) %>% kable() %>% kable_styling()
+```
+
+Suspicious pair with EBGM05 > 5, which are clearly reporting signals:
+
+```{r}
+suspicious <- df_p[df_p$QUANT_05 >= 5, ]
+nrow(suspicious)
+nrow(df_p)
+nrow(suspicious) / nrow(df_p)
+
+suspicious <- suspicious[order(suspicious$QUANT_05, decreasing = TRUE), c("var1", "var2", "N", "E", "QUANT_05", "ebgm", "QUANT_95")]
+head(suspicious, 5) %>% kable() %>% kable_styling()
+```
+
+```{r}
+tabbed <- table(suspicious$var1)
+head(tabbed[order(tabbed, decreasing = TRUE)]) %>% kable() %>% kable_styling()
+```
+
+```{r,eval=FALSE}
+txt <- paste0(
+  1:nrow(suspicious),
+  ". After controlling for the confounding effects from age and gender, the reporting of the adverse reaction ",
+  suspicious$var2,
+  " for vaccine ",
+  suspicious$var1,
+  " is disproportionately high compared to this same event for all other vaccines, with ",
+  suspicious$N,
+  " total reports and an EBGM05 score ",
+  suspicious$QUANT_05,
+  "."
+)
+```
+
+```{r,eval=FALSE}
+txt[1:5]
+```
+
+```
+# [1] 1. After controlling for the confounding effects from age and gender,
+  the reporting of the adverse reaction Product use issue for vaccine
+  INFLUENZA (SEASONAL) (FLUCELVAX) is disproportionately high compared
+  to this same event for all other vaccines, with 57 total reports and
+  an EBGM05 score 115.19.
+# [2] 2. After controlling for the confounding effects from age and gender,
+  the reporting of the adverse reaction Gastrointestinal haemorrhage for
+  vaccine ROTAVIRUS (ROTASHIELD) is disproportionately high compared to
+  this same event for all other vaccines, with 94 total reports and
+  an EBGM05 score 94.7.
+# [3] 3. After controlling for the confounding effects from age and gender,
+  the reporting of the adverse reaction Product administered to patient
+  of inappropriate age for vaccine INFLUENZA (SEASONAL) (FLUBLOK QUADRIVALENT)
+  is disproportionately high compared to this same event for all other
+  vaccines, with 141 total reports and an EBGM05 score 74.88.
+# [4] 4. After controlling for the confounding effects from age and gender,
+  the reporting of the adverse reaction Product use issue for vaccine HPV
+  (CERVARIX) is disproportionately high compared to this same event for all
+  other vaccines, with 22 total reports and an EBGM05 score 70.29.
+# [5] 5. After controlling for the confounding effects from age and gender,
+  the reporting of the adverse reaction Drug administered to patient of
+  inappropriate age for vaccine INFLUENZA (SEASONAL) (FLUCELVAX) is
+  disproportionately high compared to this same event for all other
+  vaccines, with 350 total reports and an EBGM05 score 53.27.
+```
+
+In the top-ranked vaccine-adverse event pairs, we find some commonly reported "adverse reactions" that are can be mostly attributed to human errors or logistical issues, such as:
+
+```
+Wrong product administered
+Wrong technique in drug usage process
+Drug administered to patient of inappropriate age
+Product distribution issue
+```
+
+This indicates a possibility to future improve the administer process for or improving the product labeling for certain types of vaccines.
+
+Certain cases also indicates some data quality issues. For example, "No adverse event" is not an actual adverse event, but was included in the VAERS database, and "Product use issue" is a term that is too generic to be meaningfully interpreted. Such findings could be helpful in guiding the improvement of the upstream reporting data quality and the data ingestion procedures.
+
+# Visualize Empirical Bayes scores
+
+```{r}
+df_p <- readRDS("data-processed/df_p.rds")
+squashed <- squashData(df_p, bin_size = 100, keep_pts = 0)
+squashed <- squashData(squashed, count = 2, bin_size = 12)
+
+theta_hat <- readRDS("data-processed/theta_hat.rds")
+```
+
+```{r}
+est <- list("estimates" = theta_hat)
+names(est$estimates) <- c("alpha1", "beta1", "alpha2", "beta2", "P")
+
+# for the 5th and 95th percentiles
+ebout <- ebScores(
+  df_p,
+  hyper_estimate = est,
+  quantiles = c(5, 95)
+)
+
+print(ebout, threshold = 10)
+```
+
+Global might not be very helpful:
+
+```{r}
+plot(ebout, plot.type = "histogram")
+plot(ebout, plot.type = "shrinkage")
+```
+
+Focus on a specific type of adverse event:
+
+```{r}
+plot(ebout, event = "Vomiting")
+plot(ebout, plot.type = "histogram", event = "Vomiting")
+plot(ebout, plot.type = "shrinkage", event = "Vomiting")
+```
+
+```{r,echo=FALSE}
+saveRDS(suspicious, file = "data-processed/df_gps.rds")
+```

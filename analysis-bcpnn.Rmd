@@ -1,0 +1,56 @@
+---
+title: "Base Ranker: Bayesian Confidence Propagation Neural Network"
+author:
+  - name: Nan Xiao
+    url: https://nanx.me/
+    affiliation: Seven Bridges
+    affiliation_url: https://www.sevenbridges.com/
+  - name: Soner Koc
+    url: https://github.com/skoc
+    affiliation: Seven Bridges
+    affiliation_url: https://www.sevenbridges.com/
+  - name: Kaushik Ghose
+    url: https://kaushikghose.wordpress.com/
+    affiliation: Seven Bridges
+    affiliation_url: https://www.sevenbridges.com/
+date: "`r Sys.Date()`"
+output: distill::distill_article
+bibliography: rankv.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, cache = TRUE)
+```
+
+Load the packages for BCPNN-based singal detection and ranking:
+
+```{r}
+suppressMessages(library("PhViD"))
+library("kableExtra")
+```
+
+Load the preprocessed VAERS data and transform it into the analyzable format:
+
+```{r}
+df_p <- readRDS("data-processed/df_p.rds")
+df_p <- df_p[, 1:3]
+df_v <- as.PhViD(df_p, MARGIN.THRES = 10)
+```
+
+Calculate the Information Component derived by the Bayesian neural network model [@bate1998], [@noren2006] and the ranking statistic --- 2.5% quantile of the posterior distribution of IC:
+
+```{r}
+lst_bcpnn <- BCPNN(df_v, MIN.n11 = 10, DECISION = 3, RANKSTAT = 2)
+df_bcpnn <- lst_bcpnn$SIGNALS[order(lst_bcpnn$SIGNALS$`Q_0.025(log(IC))`, decreasing = TRUE), 1:5]
+row.names(df_bcpnn) <- NULL
+```
+
+View the top ranked vaccine-adverse event pairs:
+
+```{r}
+head(df_bcpnn) %>% kable() %>% kable_styling()
+```
+
+```{r,echo=FALSE}
+saveRDS(df_bcpnn, file = "data-processed/df_bcpnn.rds")
+```
