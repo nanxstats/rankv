@@ -1,0 +1,8 @@
+base
+openEBGM
+magrittr
+foreach
+iterators
+doParallel
+DEoptim
+kableExtra
