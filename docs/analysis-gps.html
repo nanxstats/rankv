@@ -44,7 +44,7 @@
   <!--radix_placeholder_rmarkdown_metadata-->
 
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","author","date","output"]}},"value":[{"type":"character","attributes":{},"value":["Base Ranker: Gamma Poisson Shrinker (GPS)"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url","affiliation","affiliation_url"]}},"value":[{"type":"character","attributes":{},"value":["Nan Xiao"]},{"type":"character","attributes":{},"value":["https://nanx.me/"]},{"type":"character","attributes":{},"value":["Seven Bridges"]},{"type":"character","attributes":{},"value":["https://www.sevenbridges.com/"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url","affiliation","affiliation_url"]}},"value":[{"type":"character","attributes":{},"value":["Soner Koc"]},{"type":"character","attributes":{},"value":["https://github.com/skoc"]},{"type":"character","attributes":{},"value":["Seven Bridges"]},{"type":"character","attributes":{},"value":["https://www.sevenbridges.com/"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url","affiliation","affiliation_url"]}},"value":[{"type":"character","attributes":{},"value":["Kaushik Ghose"]},{"type":"character","attributes":{},"value":["https://kaushikghose.wordpress.com/"]},{"type":"character","attributes":{},"value":["Seven Bridges"]},{"type":"character","attributes":{},"value":["https://www.sevenbridges.com/"]}]}]},{"type":"character","attributes":{},"value":["2020-03-11"]},{"type":"character","attributes":{},"value":["distill::distill_article"]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","author","date","output"]}},"value":[{"type":"character","attributes":{},"value":["Base Ranker: Gamma Poisson Shrinker (GPS)"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url","affiliation","affiliation_url"]}},"value":[{"type":"character","attributes":{},"value":["Nan Xiao"]},{"type":"character","attributes":{},"value":["https://nanx.me/"]},{"type":"character","attributes":{},"value":["Seven Bridges"]},{"type":"character","attributes":{},"value":["https://www.sevenbridges.com/"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url","affiliation","affiliation_url"]}},"value":[{"type":"character","attributes":{},"value":["Soner Koc"]},{"type":"character","attributes":{},"value":["https://github.com/skoc"]},{"type":"character","attributes":{},"value":["Seven Bridges"]},{"type":"character","attributes":{},"value":["https://www.sevenbridges.com/"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url","affiliation","affiliation_url"]}},"value":[{"type":"character","attributes":{},"value":["Kaushik Ghose"]},{"type":"character","attributes":{},"value":["https://kaushikghose.wordpress.com/"]},{"type":"character","attributes":{},"value":["Seven Bridges"]},{"type":"character","attributes":{},"value":["https://www.sevenbridges.com/"]}]}]},{"type":"character","attributes":{},"value":["2020-03-11"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["toc"]}},"value":[{"type":"logical","attributes":{},"value":[true]}]}]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
   <!--radix_placeholder_navigation_in_header-->
@@ -1341,8 +1341,18 @@ Pipeline
 </div>
 
 <div class="d-article">
+<h3 class="d-toc-header">Table of Contents</h3>
+<nav class="d-toc" id="TOC">
+<ul>
+<li><a href="#calculate-prr">Calculate PRR</a></li>
+<li><a href="#fit-prior">Fit Prior</a></li>
+<li><a href="#infer-empirical-bayes-scores">Infer Empirical Bayes scores</a></li>
+<li><a href="#visualize-empirical-bayes-scores">Visualize Empirical Bayes scores</a></li>
+</ul>
+</nav>
+<hr class="d-toc-separator"/>
 <h1 id="calculate-prr">Calculate PRR</h1>
-<p>Calculate actual counts (N), expected counts (E) of each vaccine-symptom combination, relative reporting ratio (RR), and proportional reporting ratio (PRR) using age + gender stratification to control potential confounding effects <span class="citation" data-cites="canida2017openebgm">[@canida2017openebgm]</span>:</p>
+<p>Calculate actual counts (N), expected counts (E) of each vaccine-symptom combination, relative reporting ratio (RR), and proportional reporting ratio (PRR) using age + gender stratification to control potential confounding effects:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 library(&quot;openEBGM&quot;)
