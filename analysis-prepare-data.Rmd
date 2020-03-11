@@ -33,14 +33,15 @@ To download the VAERS data:
 - Download the zip files from 1990 to 2019 (need to pass the captchas).
 - Put all downloaded zip files in the `data/` folder as is.
 
-As time of the download (Feburary 2020), all years of data since 1990
+As time of the downloading (Feburary 2020), data from all years since 1990
 was complete except for 2019. The data for 2019 contains VAERS
 reports processed as of 2019-12-14.
 
-We think the captchas in each dataset download page makes it unnecessarily
-complicated to automate the data retrieval process, especially when 30 years
-of data. Providing an standard, programatically accessible API for retriving
-the data like the current AERS database would be helpful.
+The captchas on each dataset download page might make it a bit complicated
+to automate the data retrieval process, especially when 30 years of
+data needs to be downloaded. Providing an standard, programatically
+accessible API for retriving the data like the current AERS database
+would be helpful.
 
 # Load the data
 

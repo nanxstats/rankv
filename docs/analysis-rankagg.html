@@ -1432,23 +1432,16 @@ rankagg$top.list</code></pre>
 [24] &quot;SMALLPOX (ACAM2000) &lt;&gt; Vaccinia virus infection&quot;                                                    
 [25] &quot;SMALLPOX (ACAM2000) &lt;&gt; Echocardiogram normal&quot;                                                       </code></pre>
 </div>
-<p>Write the results to txt file for submission:</p>
+<p>In the aggregated top-ranked vaccine-adverse event pairs, we find some commonly reported “adverse reactions” that are can be mostly attributed to human errors or logistical issues, such as:</p>
+<pre><code>
+Wrong product administered
+Wrong technique in drug usage process
+Drug administered to patient of inappropriate age
+Product distribution issue</code></pre>
+<p>This indicates a possibility to improve the vaccine administration process for or to improve the product labeling for certain types of vaccines in the future.</p>
+<p>Certain detected signals from individual lists also indicates some data quality issues. For example, “No adverse event” is not an actual adverse event, but was included in the VAERS database, and “Product use issue” is a term that is too generic to be meaningfully interpreted by the regulators. Such findings could be helpful in guiding the improvement of the upstream reporting data quality and the data ingestion procedures.</p>
 <div class="layout-chunk" data-layout="l-body">
-<pre class="r"><code>
-df_gps_agg &lt;- df_gps[rankagg$top.list, ]
 
-txt &lt;- paste0(
-  1:nrow(df_gps_agg),
-  &quot;. After aggregating multiple ranks of the detected signals, the reporting of the adverse reaction \&quot;&quot;,
-  df_gps_agg$var2,
-  &quot;\&quot; for vaccine \&quot;&quot;,
-  df_gps_agg$var1,
-  &quot;\&quot; is disproportionately high compared to this same event for all other vaccines, with &quot;,
-  df_gps_agg$N,
-  &quot; total reports.&quot;
-)
-
-write(paste(txt, collapse = &quot;\n&quot;), file = &quot;submission/rankv-anomalies.txt&quot;)</code></pre>
 </div>
 <div id="refs" class="references hanging-indent" role="doc-bibliography">
 <div id="ref-pihur2007">

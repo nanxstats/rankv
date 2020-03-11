@@ -88,9 +88,21 @@ plot(rankagg)
 rankagg$top.list
 ```
 
-Write the results to txt file for submission:
+In the aggregated top-ranked vaccine-adverse event pairs, we find some commonly reported "adverse reactions" that are can be mostly attributed to human errors or logistical issues, such as:
 
-```{r}
+```
+Wrong product administered
+Wrong technique in drug usage process
+Drug administered to patient of inappropriate age
+Product distribution issue
+```
+
+This indicates a possibility to improve the vaccine administration process for or to improve the product labeling for certain types of vaccines in the future.
+
+Certain detected signals from individual lists also indicates some data quality issues. For example, "No adverse event" is not an actual adverse event, but was included in the VAERS database, and "Product use issue" is a term that is too generic to be meaningfully interpreted by the regulators. Such findings could be helpful in guiding the improvement of the upstream reporting data quality and the data ingestion procedures.
+
+```{r,echo=FALSE}
+# write to txt file for submission
 df_gps_agg <- df_gps[rankagg$top.list, ]
 
 txt <- paste0(
