@@ -1,9 +1,9 @@
 name: "rankv"
 title: "Rank Aggregated Signal Detection for VAERS Data"
 description: |
-  This site presents the solution code and results for the PrecisionFDA
-  Gaining New Insights by Detecting Adverse Event Anomalies Using FDA Open Data
-  challenge.
+  This site presents our method, analysis pipeline, and findings for the
+  precisionFDA adverse event anomaly detecting challenge.
+favicon: "assets/favicon.png"
 output_dir: "docs"
 navbar:
   logo:
@@ -16,13 +16,13 @@ navbar:
         - text: "Prepare VAERS data for safety signal detection"
           href: analysis-prepare-data.html
         - text: "---"
-        - text: "Base Ranker: Gamma Poisson Shrinker"
+        - text: "Base ranker: Gamma Poisson Shrinker"
           href: analysis-gps.html
-        - text: "Base Ranker: Proportional Reporting Ratio"
+        - text: "Base ranker: Proportional Reporting Ratio"
           href: analysis-prr.html
-        - text: "Base Ranker: Reporting Odds Ratio"
+        - text: "Base ranker: Reporting Odds Ratio"
           href: analysis-ror.html
-        - text: "Base Ranker: Bayesian Confidence Propagation Neural Network"
+        - text: "Base ranker: Bayesian Confidence Propagation Neural Network"
           href: analysis-bcpnn.html
         - text: "---"
         - text: "Rank aggregation for ensembled safety signal detection"
