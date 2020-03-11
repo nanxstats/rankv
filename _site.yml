@@ -15,6 +15,7 @@ navbar:
       menu:
         - text: "Prepare VAERS data for safety signal detection"
           href: analysis-prepare-data.html
+        - text: "---"
         - text: "Base Ranker: Gamma Poisson Shrinker"
           href: analysis-gps.html
         - text: "Base Ranker: Proportional Reporting Ratio"
@@ -23,6 +24,7 @@ navbar:
           href: analysis-ror.html
         - text: "Base Ranker: Bayesian Confidence Propagation Neural Network"
           href: analysis-bcpnn.html
+        - text: "---"
         - text: "Rank aggregation for ensembled safety signal detection"
           href: analysis-rankagg.html
     - icon: fab fa-github
