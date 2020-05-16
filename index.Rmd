@@ -28,6 +28,8 @@ knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 
 Here is the [method summary](method.html).
 
+<img src="assets/flow.svg" alt="">
+
 # Pipeline
 
 1. [Prepare VAERS data for safety signal detection](analysis-prepare-data.html)
