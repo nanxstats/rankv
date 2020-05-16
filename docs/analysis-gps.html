@@ -1349,13 +1349,15 @@ Pipeline
 <h3 class="d-toc-header">Table of Contents</h3>
 <nav class="d-toc" id="TOC">
 <ul>
+<li><a href="#data-model">Data Model</a></li>
 <li><a href="#calculate-prr">Calculate PRR</a></li>
 <li><a href="#fit-prior">Fit Prior</a></li>
-<li><a href="#infer-empirical-bayes-scores">Infer Empirical Bayes scores</a></li>
-<li><a href="#visualize-empirical-bayes-scores">Visualize Empirical Bayes scores</a></li>
+<li><a href="#infer-empirical-bayes-scores">Infer Empirical Bayes Scores</a></li>
+<li><a href="#sanity-check-empirical-bayes-scores">Sanity Check Empirical Bayes Scores</a></li>
 </ul>
 </nav>
 <hr class="d-toc-separator"/>
+<h1 id="data-model">Data Model</h1>
 <p>Let’s denote the vaccine-symptom pairs from the VAERS database as <span class="math inline">\(2 \times 2\)</span> contingency tables:</p>
 <table>
 <thead>
@@ -1399,7 +1401,16 @@ Pipeline
 <p><span class="math display">\[
 \lambda_{ij} \sim P \ \text{Gamma}(\alpha_1, \beta_1) + (1-P) \ \text{Gamma}(\alpha_2, \beta_2).
 \]</span></p>
-<p>Using an empirical Bayesian approach, we can use the data to estimate the paramaters (<span class="math inline">\(\alpha_1\)</span>, <span class="math inline">\(\alpha_2\)</span>, <span class="math inline">\(\beta_1\)</span>, <span class="math inline">\(\beta_2\)</span>, <span class="math inline">\(P\)</span>), and then calculate the posterior for <span class="math inline">\(\lambda\)</span> and find the expectation of <span class="math inline">\(\log(\lambda)\)</span>. The Empirical Bayesian Geometric Mean (EBGM) is then defined as</p>
+<p>Using an empirical Bayesian approach, we can use the data to estimate the paramaters (<span class="math inline">\(\alpha_1\)</span>, <span class="math inline">\(\alpha_2\)</span>, <span class="math inline">\(\beta_1\)</span>, <span class="math inline">\(\beta_2\)</span>, <span class="math inline">\(P\)</span>), calculate the posterior for <span class="math inline">\(\lambda\)</span>, and then derive the expectation of <span class="math inline">\(\log(\lambda)\)</span>:</p>
+<p><span class="math display">\[
+E(\log(\lambda)) = Q (\psi (\alpha_1 + n_{ij}) - \log(1/\beta_1 + E_{ij})) + (1-Q) (\psi (\alpha_2 + n_{ij}) - \log(1/\beta_2) + E_{ij})
+\]</span></p>
+<p>where</p>
+<p><span class="math display">\[
+Q = \frac{P \cdot \text{NB}(n_{ij}, E_{ij} \ | \ \alpha_1, \beta_1)}{P \cdot \text{NB}(n_{ij}, E_{ij} \ | \ \alpha_1, \beta_1) + (1-P) \cdot \text{NB}(n_{ij}, E_{ij} \ | \ \alpha_2, \beta_2)}
+\]</span></p>
+<p><span class="math inline">\(\psi\)</span> is the digamma function. <span class="math inline">\(\text{NB}\)</span> is the negative binomial distribution.</p>
+<p>With the expectation of <span class="math inline">\(\log(\lambda)\)</span>, we can define the Empirical Bayesian Geometric Mean (EBGM) as</p>
 <p><span class="math display">\[EBGM = e^{E(\log(\lambda))}.\]</span></p>
 <p>The fifth percentile of the posterior distribution of <span class="math inline">\(\lambda\)</span> is denoted as EB05 and interpreted as the lower one-sided 95% confidence limit for the EBGM. This estimator gives more conservative estimates when the event counts are small, thus yields a shrinkage estimate which could reduce the number of false-positive signals.</p>
 <h1 id="calculate-prr">Calculate PRR</h1>
@@ -1409,6 +1420,7 @@ Pipeline
 library(&quot;openEBGM&quot;)
 library(&quot;magrittr&quot;)
 library(&quot;kableExtra&quot;)
+library(&quot;ggsci&quot;)
 
 df_p &lt;- readRDS(&quot;data-processed/df.rds&quot;) %&gt;%
   processRaw(stratify = TRUE, zeroes = FALSE)</code></pre>
@@ -1517,7 +1529,7 @@ theta_hat</code></pre>
 <pre class="r"><code>
 saveRDS(theta_hat, file = &quot;data-processed/theta_hat.rds&quot;)</code></pre>
 </div>
-<h1 id="infer-empirical-bayes-scores">Infer Empirical Bayes scores</h1>
+<h1 id="infer-empirical-bayes-scores">Infer Empirical Bayes Scores</h1>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 df_p &lt;- readRDS(&quot;data-processed/df_p.rds&quot;)
@@ -2229,7 +2241,7 @@ txt[1:5]</code></pre>
   inappropriate age for vaccine INFLUENZA (SEASONAL) (FLUCELVAX) is
   disproportionately high compared to this same event for all other
   vaccines, with 350 total reports and an EBGM05 score 53.27.</code></pre>
-<h1 id="visualize-empirical-bayes-scores">Visualize Empirical Bayes scores</h1>
+<h1 id="sanity-check-empirical-bayes-scores">Sanity Check Empirical Bayes Scores</h1>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 df_p &lt;- readRDS(&quot;data-processed/df_p.rds&quot;)
@@ -2274,25 +2286,25 @@ Top 5 Highest QUANT_05 Scores
 48195  0.09509842    70.29
 73652  5.88683526    53.27</code></pre>
 </div>
-<p>Global might not be very helpful:</p>
+<p>The global overview might not be too helpful:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 plot(ebout, plot.type = &quot;histogram&quot;)</code></pre>
 <p><img src="analysis-gps_files/figure-html5/unnamed-chunk-18-1.png" width="624" /></p>
 <pre class="r"><code>
-plot(ebout, plot.type = &quot;shrinkage&quot;)</code></pre>
+plot(ebout, plot.type = &quot;shrinkage&quot;) + scale_color_nejm()</code></pre>
 <p><img src="analysis-gps_files/figure-html5/unnamed-chunk-18-2.png" width="624" /></p>
 </div>
-<p>Focus on a specific type of adverse event:</p>
+<p>Let’s focus on a specific type of adverse event (vomiting):</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
-plot(ebout, event = &quot;Vomiting&quot;)</code></pre>
+plot(ebout, event = &quot;Vomiting&quot;) + scale_fill_nejm()</code></pre>
 <p><img src="analysis-gps_files/figure-html5/unnamed-chunk-19-1.png" width="624" /></p>
 <pre class="r"><code>
 plot(ebout, plot.type = &quot;histogram&quot;, event = &quot;Vomiting&quot;)</code></pre>
 <p><img src="analysis-gps_files/figure-html5/unnamed-chunk-19-2.png" width="624" /></p>
 <pre class="r"><code>
-plot(ebout, plot.type = &quot;shrinkage&quot;, event = &quot;Vomiting&quot;)</code></pre>
+plot(ebout, plot.type = &quot;shrinkage&quot;, event = &quot;Vomiting&quot;) + scale_color_nejm()</code></pre>
 <p><img src="analysis-gps_files/figure-html5/unnamed-chunk-19-3.png" width="624" /></p>
 </div>
 <div class="layout-chunk" data-layout="l-body">

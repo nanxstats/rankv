@@ -1347,6 +1347,7 @@ Pipeline
 </div>
 
 <div class="d-article">
+<h1 id="data-model">Data Model</h1>
 <p>The BCPNN method leverages the information component (IC) to measure the association between the vaccine and symptom. IC is widely used to measure the mutual information between two random variables.</p>
 <p>Let <span class="math inline">\(p_i\)</span> be the probability of a target vaccine <span class="math inline">\(i\)</span> exposure being reported, <span class="math inline">\(p_j\)</span> be the the probability of the target symptom <span class="math inline">\(j\)</span> being reported, and <span class="math inline">\(p_{ij}\)</span> be the joint probability of a report on the target symptom <span class="math inline">\(j\)</span> under exposure to the target vaccine <span class="math inline">\(i\)</span>. Bate et al. <span class="citation" data-cites="bate1998">(Bate et al. <a href="#ref-bate1998" role="doc-biblioref">1998</a>)</span> defines the metric <span class="math inline">\(\text{IC}_{ij}\)</span> as</p>
 <p><span class="math display">\[
@@ -1407,6 +1408,15 @@ p_j \sim \text{Beta}(1, 1).
 <p><span class="math display">\[
 \hat{\text{IC}_{ij}} = \log_2 \frac{(n_{ij} + 1) (n + 2)^2}{(n_{ij} + 1) (n+2)^2 + n(n_i + 1) (n_j + 1)}.
 \]</span></p>
+<p>The variance estimation is given by</p>
+<p><span class="math display">\[
+\hat{\sigma_{ij}}^2 = \frac{1}{(\log 2)^2} (\frac{n - n_{ij} + \gamma - 1}{(n_{ij} + 1)(n+\gamma+1)} + \frac{n-n_{i} + 1}{(n_i + 1) (n+3)} + \frac{n - n_j + 1}{(n_j + 1)(n+3)})
+\]</span></p>
+<p>where</p>
+<p><span class="math display">\[
+\gamma = \frac{(n+2)^2}{(n_i + 1)(n_j + 1)}.
+\]</span></p>
+<h1 id="computation">Computation</h1>
 <p>Load the packages for BCPNN-based singal detection and ranking:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>

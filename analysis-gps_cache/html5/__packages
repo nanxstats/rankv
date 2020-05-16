@@ -6,3 +6,4 @@ foreach
 iterators
 doParallel
 DEoptim
+ggsci
