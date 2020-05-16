@@ -28,6 +28,10 @@ knitr::opts_chunk$set(echo = FALSE)
 
 Numerous signal detection methods have been proposed in the past decades for pharmacovigilance monitoring in large databases. These methods often produce a ranked list of detected signals (anomalies) warranting further investigations. However, there is still a lack of a holistic view and integration of the results from these approaches. Here, we developed a new signal detection method that can ensemble the vaccine safety signals detected from any signal detection methods, and generate an aggregated list of top signals based on distance metric optimization. Our method can potentially enhance the weak signals from individual methods and, at the same time, reduce the number of false-positive signals discovered by chance.
 
+A flow diagram of our method:
+
+<img src="assets/flow.svg" alt="">
+
 # Base signal detectors and signal rankers
 
 We included four mainstream signal detection methods that have already been applied in real-world pharmacovigilance monitoring by regulatory agencies globally. These methods (or metrics) are:
