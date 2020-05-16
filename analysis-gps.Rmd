@@ -24,11 +24,43 @@ bibliography: rankv.bib
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, cache = TRUE)
 ```
 
+Let's denote the vaccine-symptom pairs from the VAERS database as $2 \times 2$ contingency tables:
+
+| Target vaccine | Target symptom | All other symptoms       | Total     |
+| :------------- | :------------- | :----------------------- | :-------- |
+| Yes            | $n_{ij}$       | $n_i - n_{ij}$           | $n_i$      |
+| No             | $n_j - n_{ij}$ | $n - n_i - n_j + n_{ij}$ | $n - n_i$ |
+| Total          | $n_j$          | $n - n_j$                | $n$       |
+
+It is often the case than not that $n_{ij}$ occures as a rare event such that the observed count follows a Poisson distribution. In the GPS algorithm, we model the relative reporting ratio (RRR), which measures the ratio of how many symptoms under vaccine were actually observed over the number of expected symptoms, under the assumption that the symptoms and vaccine exposure are independent. The RRR ($\lambda$) is defined as
+
+$$
+\lambda_{ij} = \frac{\mu_{ij}}{E_{ij}}.
+$$
+
+$\mu_{ij}$ is the mean of the Poisson distribution of $n_{ij}$. $E_{ij}$ is the expected event count under the assumption that the vaccine exposure and the symptom are idependent. It can be estimated as
+
+$$
+\hat{E_{ij}} = \frac{n_i n_j}{n}.
+$$
+
+For $\lambda$, we can use a gamma distribution as a conjugate prior since the Poisson distributed $n_{ij}$. ($n_{ij} \sim Poisson (\mu_{ij})$). In the GPS model, a simple mixture of two Gamma distributions was used as the prior to allow for more flexibility in the model:
+
+$$
+\lambda_{ij} \sim P \ \text{Gamma}(\alpha_1, \beta_1) + (1-P) \ \text{Gamma}(\alpha_2, \beta_2).
+$$
+
+Using an empirical Bayesian approach, we can use the data to estimate the paramaters ($\alpha_1$, $\alpha_2$, $\beta_1$, $\beta_2$, $P$), and then calculate the posterior for $\lambda$ and find the expectation of $\log(\lambda)$. The Empirical Bayesian Geometric Mean (EBGM) is then defined as
+
+$$EBGM = e^{E(\log(\lambda))}.$$
+
+The fifth percentile of the posterior distribution of $\lambda$ is denoted as EB05 and interpreted as the lower one-sided 95% confidence limit for the EBGM. This estimator gives more conservative estimates when the event counts are small, thus yields a shrinkage estimate which could reduce the number of false-positive signals.
+
 # Calculate PRR
 
 To fit a Gamma Poisson Shrinker model [@dumouchel1999], we first calculate
 actual counts (N), expected counts (E) of each vaccine-symptom combination,
-relative reporting ratio (RR), and proportional reporting ratio (PRR)
+relative reporting ratio (RRR), and proportional reporting ratio (PRR)
 using age + gender stratification to control potential confounding effects:
 
 ```{r}

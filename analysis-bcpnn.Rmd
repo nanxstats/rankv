@@ -22,6 +22,56 @@ bibliography: rankv.bib
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, cache = TRUE)
 ```
 
+The BCPNN method leverages the information component (IC) to measure the association between the vaccine and symptom. IC is widely used to measure the mutual information between two random variables.
+
+Let $p_i$ be the probability of a target vaccine $i$ exposure being reported, $p_j$ be the the probability of the target symptom $j$ being reported, and $p_{ij}$ be the joint probability of a report on the target symptom $j$ under exposure to the target vaccine $i$. Bate et al. [@bate1998] defines the metric $\text{IC}_{ij}$ as
+
+$$
+\text{IC}_{ij} = \log_2\frac{p_{ij}}{p_i p_j}.
+$$
+
+Recall the contingency table for target vaccine $i$ and target symptom $j$:
+
+| Target vaccine | Target symptom | All other symptoms       | Total     |
+| :------------- | :------------- | :----------------------- | :-------- |
+| Yes            | $n_{ij}$       | $n_i - n_{ij}$           | $n_i$      |
+| No             | $n_j - n_{ij}$ | $n - n_i - n_j + n_{ij}$ | $n - n_i$ |
+| Total          | $n_j$          | $n - n_j$                | $n$       |
+
+Let the cell counts for vaccine-symptom pairs $(i, j)$ be $n_{ij}$. The BCPNN data model assumes
+
+$$
+n_{ij} | p_{ij} \sim \text{Binomial}(n, p_{ij}),\\
+p_{ij} \sim \text{Beta}(\alpha_{ij}, \beta_{ij})
+$$
+
+where
+
+$$
+\alpha_{ij} = 1,\\
+\beta_{ij} = \frac{1}{E(p_i | n_i) + E(p_j | n_j)} - 1.
+$$
+
+Under the assumption of independence, the marginal sums over the rows and columns of the $i \times j$ contingency table are:
+
+$$
+n_i | p_i \sim \text{Binomial}(n, p_i),\\
+n_j | p_j \sim \text{Binomial}(n, p_j)
+$$
+
+where
+
+$$
+p_i \sim \text{Beta}(1, 1),\\
+p_j \sim \text{Beta}(1, 1).
+$$
+
+The IC estimate is
+
+$$
+\hat{\text{IC}_{ij}} = \log_2 \frac{(n_{ij} + 1) (n + 2)^2}{(n_{ij} + 1) (n+2)^2 + n(n_i + 1) (n_j + 1)}.
+$$
+
 Load the packages for BCPNN-based singal detection and ranking:
 
 ```{r}

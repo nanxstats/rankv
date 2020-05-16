@@ -83,7 +83,7 @@ rankagg <- RankAggreg(
 
 Check the rank-aggregated list:
 
-```{r}
+```{r, fig.width=8, fig.height=12}
 plot(rankagg)
 rankagg$top.list
 ```

@@ -22,6 +22,28 @@ bibliography: rankv.bib
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, cache = TRUE)
 ```
 
+PRR is a commonly used metric for safety signal detection. We can denote the vaccine-symptom pairs from the VAERS database as many $2 \times 2$ contingency tables:
+
+| Target vaccine | Target symptom | All other symptoms       | Total     |
+| :------------- | :------------- | :----------------------- | :-------- |
+| Yes            | $n_{ij}$       | $n_i - n_{ij}$           | $n_i$      |
+| No             | $n_j - n_{ij}$ | $n - n_i - n_j + n_{ij}$ | $n - n_i$ |
+| Total          | $n_j$          | $n - n_j$                | $n$       |
+
+In the table, $n_i = \sum_j n_{ij}$, $n_j = \sum_i n_{ij}$. They are the marginal sums over all other symptoms or vaccines for each unique vaccine $i$ and symptom $j$. The proportional reporting ratio (PRR) [@evans2001] for each vaccine-symptom pair is defined as
+
+$$
+PRR_{ij} = \frac{n_{ij}}{E_{ij}}
+$$
+
+where
+
+$$
+E_{ij} = \frac{n_j (n_i - n_{ij})}{n - n_{ij}}.
+$$
+
+$PRR_{ij}$ measures the disproportionality in rates of the target symptom $j$ to all other symptoms for exposure to vaccine $i$ in the contingency table. It assumes that the reports of symptom $j$ are independent to all other symptoms on vaccine $i$, while this can turned out to be a quite strong assumption in reality. A relatively higher value of PRR indicates stronger association between the vaccine and the symptom.
+
 Load the packages for PRR-based singal detection and ranking:
 
 ```{r}
@@ -37,7 +59,7 @@ df_p <- df_p[, 1:3]
 df_v <- as.PhViD(df_p, MARGIN.THRES = 10)
 ```
 
-Calculate the Proportional Reporting Ratio (PRR) [@evans2001] and the ranking statistic --- lower bound of the 95% two-sided confidence interval of log(PRR):
+We calculate the Proportional Reporting Ratio (PRR) [@evans2001] and the ranking statistic --- lower bound of the 95% two-sided confidence interval of log(PRR):
 
 ```{r}
 lst_prr <- PRR(df_v, MIN.n11 = 10, DECISION = 3, RANKSTAT = 2)

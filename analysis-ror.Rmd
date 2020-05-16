@@ -22,6 +22,28 @@ bibliography: rankv.bib
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, cache = TRUE)
 ```
 
+Beside PRR, ROR is yet another commonly used metric for safety signal detection. Let's denote the vaccine-symptom pairs from the VAERS database as many $2 \times 2$ contingency tables:
+
+| Target vaccine | Target symptom | All other symptoms       | Total     |
+| :------------- | :------------- | :----------------------- | :-------- |
+| Yes            | $n_{ij}$       | $n_i - n_{ij}$           | $n_i$      |
+| No             | $n_j - n_{ij}$ | $n - n_i - n_j + n_{ij}$ | $n - n_i$ |
+| Total          | $n_j$          | $n - n_j$                | $n$       |
+
+In the table, $n_i = \sum_j n_{ij}$, $n_j = \sum_i n_{ij}$. The reporting odds ratio (ROR) [@van2002comparison] for each vaccine-symptom pair is defined as
+
+$$
+ROR_{ij} = \frac{n_{ij}}{\tilde{E}_{ij}}
+$$
+
+where
+
+$$
+\tilde{E}_{ij} = \frac{(n_i - n_{ij})(n_j - n_{ij})}{n - n_i - n_j + n_{ij}}.
+$$
+
+Similar to PRR, a relatively higher ROR indicates stronger association between the vaccine and the symptom.
+
 Load the packages for ROR-based singal detection and ranking:
 
 ```{r}
