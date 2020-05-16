@@ -25,8 +25,8 @@
   <link rel="icon" type="image/png" href="assets/favicon.png"/>
 
   <!--  https://schema.org/Article -->
-  <meta property="article:published" itemprop="datePublished" content="2020-03-11"/>
-  <meta property="article:created" itemprop="dateCreated" content="2020-03-11"/>
+  <meta property="article:published" itemprop="datePublished" content="2020-05-15"/>
+  <meta property="article:created" itemprop="dateCreated" content="2020-05-15"/>
   <meta name="article:author" content="Nan Xiao"/>
   <meta name="article:author" content="Soner Koc"/>
   <meta name="article:author" content="Kaushik Ghose"/>
@@ -47,7 +47,7 @@
   <!--radix_placeholder_rmarkdown_metadata-->
 
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","author","date","output","bibliography"]}},"value":[{"type":"character","attributes":{},"value":["Base Ranker: Proportional Reporting Ratio (PRR)"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url","affiliation","affiliation_url"]}},"value":[{"type":"character","attributes":{},"value":["Nan Xiao"]},{"type":"character","attributes":{},"value":["https://nanx.me/"]},{"type":"character","attributes":{},"value":["Seven Bridges"]},{"type":"character","attributes":{},"value":["https://www.sevenbridges.com/"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url","affiliation","affiliation_url"]}},"value":[{"type":"character","attributes":{},"value":["Soner Koc"]},{"type":"character","attributes":{},"value":["https://github.com/skoc"]},{"type":"character","attributes":{},"value":["Seven Bridges"]},{"type":"character","attributes":{},"value":["https://www.sevenbridges.com/"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url","affiliation","affiliation_url"]}},"value":[{"type":"character","attributes":{},"value":["Kaushik Ghose"]},{"type":"character","attributes":{},"value":["https://kaushikghose.wordpress.com/"]},{"type":"character","attributes":{},"value":["Seven Bridges"]},{"type":"character","attributes":{},"value":["https://www.sevenbridges.com/"]}]}]},{"type":"character","attributes":{},"value":["2020-03-11"]},{"type":"character","attributes":{},"value":["distill::distill_article"]},{"type":"character","attributes":{},"value":["rankv.bib"]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","author","date","output","bibliography"]}},"value":[{"type":"character","attributes":{},"value":["Base Ranker: Proportional Reporting Ratio (PRR)"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url","affiliation","affiliation_url"]}},"value":[{"type":"character","attributes":{},"value":["Nan Xiao"]},{"type":"character","attributes":{},"value":["https://nanx.me/"]},{"type":"character","attributes":{},"value":["Seven Bridges"]},{"type":"character","attributes":{},"value":["https://www.sevenbridges.com/"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url","affiliation","affiliation_url"]}},"value":[{"type":"character","attributes":{},"value":["Soner Koc"]},{"type":"character","attributes":{},"value":["https://github.com/skoc"]},{"type":"character","attributes":{},"value":["Seven Bridges"]},{"type":"character","attributes":{},"value":["https://www.sevenbridges.com/"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url","affiliation","affiliation_url"]}},"value":[{"type":"character","attributes":{},"value":["Kaushik Ghose"]},{"type":"character","attributes":{},"value":["https://kaushikghose.wordpress.com/"]},{"type":"character","attributes":{},"value":["Seven Bridges"]},{"type":"character","attributes":{},"value":["https://www.sevenbridges.com/"]}]}]},{"type":"character","attributes":{},"value":["2020-05-15"]},{"type":"character","attributes":{},"value":["distill::distill_article"]},{"type":"character","attributes":{},"value":["rankv.bib"]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
   <!--radix_placeholder_navigation_in_header-->
@@ -1287,7 +1287,7 @@
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"Base Ranker: Proportional Reporting Ratio (PRR)","authors":[{"author":"Nan Xiao","authorURL":"https://nanx.me/","affiliation":"Seven Bridges","affiliationURL":"https://www.sevenbridges.com/"},{"author":"Soner Koc","authorURL":"https://github.com/skoc","affiliation":"Seven Bridges","affiliationURL":"https://www.sevenbridges.com/"},{"author":"Kaushik Ghose","authorURL":"https://kaushikghose.wordpress.com/","affiliation":"Seven Bridges","affiliationURL":"https://www.sevenbridges.com/"}],"publishedDate":"2020-03-11T00:00:00.000-04:00","citationText":"Xiao, et al., 2020"}
+{"title":"Base Ranker: Proportional Reporting Ratio (PRR)","authors":[{"author":"Nan Xiao","authorURL":"https://nanx.me/","affiliation":"Seven Bridges","affiliationURL":"https://www.sevenbridges.com/"},{"author":"Soner Koc","authorURL":"https://github.com/skoc","affiliation":"Seven Bridges","affiliationURL":"https://www.sevenbridges.com/"},{"author":"Kaushik Ghose","authorURL":"https://kaushikghose.wordpress.com/","affiliation":"Seven Bridges","affiliationURL":"https://www.sevenbridges.com/"}],"publishedDate":"2020-05-15T00:00:00.000-04:00","citationText":"Xiao, et al., 2020"}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -1342,10 +1342,50 @@ Pipeline
   
 ,   Kaushik Ghose <a href="https://kaushikghose.wordpress.com/" class="uri">https://kaushikghose.wordpress.com/</a> (Seven Bridges)<a href="https://www.sevenbridges.com/" class="uri">https://www.sevenbridges.com/</a>
   
-<br/>2020-03-11
+<br/>2020-05-15
 </div>
 
 <div class="d-article">
+<p>PRR is a commonly used metric for safety signal detection. We can denote the vaccine-symptom pairs from the VAERS database as many <span class="math inline">\(2 \times 2\)</span> contingency tables:</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Target vaccine</th>
+<th style="text-align: left;">Target symptom</th>
+<th style="text-align: left;">All other symptoms</th>
+<th style="text-align: left;">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Yes</td>
+<td style="text-align: left;"><span class="math inline">\(n_{ij}\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(n_i - n_{ij}\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(n_i\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">No</td>
+<td style="text-align: left;"><span class="math inline">\(n_j - n_{ij}\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(n - n_i - n_j + n_{ij}\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(n - n_i\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Total</td>
+<td style="text-align: left;"><span class="math inline">\(n_j\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(n - n_j\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(n\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>In the table, <span class="math inline">\(n_i = \sum_j n_{ij}\)</span>, <span class="math inline">\(n_j = \sum_i n_{ij}\)</span>. They are the marginal sums over all other symptoms or vaccines for each unique vaccine <span class="math inline">\(i\)</span> and symptom <span class="math inline">\(j\)</span>. The proportional reporting ratio (PRR) <span class="citation" data-cites="evans2001">(Evans, Waller, and Davis <a href="#ref-evans2001" role="doc-biblioref">2001</a>)</span> for each vaccine-symptom pair is defined as</p>
+<p><span class="math display">\[
+PRR_{ij} = \frac{n_{ij}}{E_{ij}}
+\]</span></p>
+<p>where</p>
+<p><span class="math display">\[
+E_{ij} = \frac{n_j (n_i - n_{ij})}{n - n_{ij}}.
+\]</span></p>
+<p><span class="math inline">\(PRR_{ij}\)</span> measures the disproportionality in rates of the target symptom <span class="math inline">\(j\)</span> to all other symptoms for exposure to vaccine <span class="math inline">\(i\)</span> in the contingency table. It assumes that the reports of symptom <span class="math inline">\(j\)</span> are independent to all other symptoms on vaccine <span class="math inline">\(i\)</span>, while this can turned out to be a quite strong assumption in reality. A relatively higher value of PRR indicates stronger association between the vaccine and the symptom.</p>
 <p>Load the packages for PRR-based singal detection and ranking:</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
@@ -1359,7 +1399,7 @@ df_p &lt;- readRDS(&quot;data-processed/df_p.rds&quot;)
 df_p &lt;- df_p[, 1:3]
 df_v &lt;- as.PhViD(df_p, MARGIN.THRES = 10)</code></pre>
 </div>
-<p>Calculate the Proportional Reporting Ratio (PRR) <span class="citation" data-cites="evans2001">(Evans, Waller, and Davis <a href="#ref-evans2001" role="doc-biblioref">2001</a>)</span> and the ranking statistic — lower bound of the 95% two-sided confidence interval of log(PRR):</p>
+<p>We calculate the Proportional Reporting Ratio (PRR) <span class="citation" data-cites="evans2001">(Evans, Waller, and Davis <a href="#ref-evans2001" role="doc-biblioref">2001</a>)</span> and the ranking statistic — lower bound of the 95% two-sided confidence interval of log(PRR):</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre class="r"><code>
 lst_prr &lt;- PRR(df_v, MIN.n11 = 10, DECISION = 3, RANKSTAT = 2)
@@ -1574,6 +1614,15 @@ Pericardial disease
 <div class="d-appendix">
 </div>
 
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
 
 <!--radix_placeholder_site_after_body-->
 <!--/radix_placeholder_site_after_body-->

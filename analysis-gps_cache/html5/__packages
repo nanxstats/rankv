@@ -1,8 +1,8 @@
 base
 openEBGM
 magrittr
+kableExtra
 foreach
 iterators
 doParallel
 DEoptim
-kableExtra
