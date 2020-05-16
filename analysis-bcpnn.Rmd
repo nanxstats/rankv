@@ -22,6 +22,8 @@ bibliography: rankv.bib
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, cache = TRUE)
 ```
 
+# Data Model
+
 The BCPNN method leverages the information component (IC) to measure the association between the vaccine and symptom. IC is widely used to measure the mutual information between two random variables.
 
 Let $p_i$ be the probability of a target vaccine $i$ exposure being reported, $p_j$ be the the probability of the target symptom $j$ being reported, and $p_{ij}$ be the joint probability of a report on the target symptom $j$ under exposure to the target vaccine $i$. Bate et al. [@bate1998] defines the metric $\text{IC}_{ij}$ as
@@ -71,6 +73,20 @@ The IC estimate is
 $$
 \hat{\text{IC}_{ij}} = \log_2 \frac{(n_{ij} + 1) (n + 2)^2}{(n_{ij} + 1) (n+2)^2 + n(n_i + 1) (n_j + 1)}.
 $$
+
+The variance estimation is given by
+
+$$
+\hat{\sigma_{ij}}^2 = \frac{1}{(\log 2)^2} (\frac{n - n_{ij} + \gamma - 1}{(n_{ij} + 1)(n+\gamma+1)} + \frac{n-n_{i} + 1}{(n_i + 1) (n+3)} + \frac{n - n_j + 1}{(n_j + 1)(n+3)})
+$$
+
+where
+
+$$
+\gamma = \frac{(n+2)^2}{(n_i + 1)(n_j + 1)}.
+$$
+
+# Computation
 
 Load the packages for BCPNN-based singal detection and ranking:
 

@@ -26,7 +26,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 
 # Method
 
-Here is the [method summary](method.html).
+Here is a [summary of our method](method.html).
 
 <img src="assets/flow.svg" alt="">
 

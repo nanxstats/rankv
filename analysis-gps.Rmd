@@ -24,6 +24,8 @@ bibliography: rankv.bib
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, cache = TRUE)
 ```
 
+# Data Model
+
 Let's denote the vaccine-symptom pairs from the VAERS database as $2 \times 2$ contingency tables:
 
 | Target vaccine | Target symptom | All other symptoms       | Total     |
@@ -50,7 +52,21 @@ $$
 \lambda_{ij} \sim P \ \text{Gamma}(\alpha_1, \beta_1) + (1-P) \ \text{Gamma}(\alpha_2, \beta_2).
 $$
 
-Using an empirical Bayesian approach, we can use the data to estimate the paramaters ($\alpha_1$, $\alpha_2$, $\beta_1$, $\beta_2$, $P$), and then calculate the posterior for $\lambda$ and find the expectation of $\log(\lambda)$. The Empirical Bayesian Geometric Mean (EBGM) is then defined as
+Using an empirical Bayesian approach, we can use the data to estimate the paramaters ($\alpha_1$, $\alpha_2$, $\beta_1$, $\beta_2$, $P$), calculate the posterior for $\lambda$, and then derive the expectation of $\log(\lambda)$:
+
+$$
+E(\log(\lambda)) = Q (\psi (\alpha_1 + n_{ij}) - \log(1/\beta_1 + E_{ij})) + (1-Q) (\psi (\alpha_2 + n_{ij}) - \log(1/\beta_2) + E_{ij})
+$$
+
+where
+
+$$
+Q = \frac{P \cdot \text{NB}(n_{ij}, E_{ij} \ | \ \alpha_1, \beta_1)}{P \cdot \text{NB}(n_{ij}, E_{ij} \ | \ \alpha_1, \beta_1) + (1-P) \cdot \text{NB}(n_{ij}, E_{ij} \ | \ \alpha_2, \beta_2)}
+$$
+
+$\psi$ is the digamma function. $\text{NB}$ is the negative binomial distribution.
+
+With the expectation of $\log(\lambda)$, we can define the Empirical Bayesian Geometric Mean (EBGM) as
 
 $$EBGM = e^{E(\log(\lambda))}.$$
 
@@ -67,6 +83,7 @@ using age + gender stratification to control potential confounding effects:
 library("openEBGM")
 library("magrittr")
 library("kableExtra")
+library("ggsci")
 
 df_p <- readRDS("data-processed/df.rds") %>%
   processRaw(stratify = TRUE, zeroes = FALSE)
@@ -162,7 +179,7 @@ Save to file:
 saveRDS(theta_hat, file = "data-processed/theta_hat.rds")
 ```
 
-# Infer Empirical Bayes scores
+# Infer Empirical Bayes Scores
 
 ```{r}
 df_p <- readRDS("data-processed/df_p.rds")
@@ -261,7 +278,7 @@ txt[1:5]
   vaccines, with 350 total reports and an EBGM05 score 53.27.
 ```
 
-# Visualize Empirical Bayes scores
+# Sanity Check Empirical Bayes Scores
 
 ```{r}
 df_p <- readRDS("data-processed/df_p.rds")
@@ -285,19 +302,19 @@ ebout <- ebScores(
 print(ebout, threshold = 10)
 ```
 
-Global might not be very helpful:
+The global overview might not be too helpful:
 
 ```{r}
 plot(ebout, plot.type = "histogram")
-plot(ebout, plot.type = "shrinkage")
+plot(ebout, plot.type = "shrinkage") + scale_color_nejm()
 ```
 
-Focus on a specific type of adverse event:
+Let's focus on a specific type of adverse event (vomiting):
 
 ```{r}
-plot(ebout, event = "Vomiting")
+plot(ebout, event = "Vomiting") + scale_fill_nejm()
 plot(ebout, plot.type = "histogram", event = "Vomiting")
-plot(ebout, plot.type = "shrinkage", event = "Vomiting")
+plot(ebout, plot.type = "shrinkage", event = "Vomiting") + scale_color_nejm()
 ```
 
 ```{r,echo=FALSE}
